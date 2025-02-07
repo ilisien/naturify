@@ -16,7 +16,9 @@
 #    - "wildflowers" or "trees" -- non-phylogenic distinctions
 #    - custom list
 # - needs to also show the place, studied and non-studied flashcards like
-# quizlet style, etc.
+# quizlet style, and the expanded taxa (or at least the family) of them
+# also needs the common name of everything to be all nice to brodie and
+# stuff
 #
 #
 #
