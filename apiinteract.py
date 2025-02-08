@@ -17,7 +17,7 @@ class Photo:
         self.square_url, self.thumb_url, self.original_url = self.get_photo_urls()
 
     def __repr__(self):
-        return f"Photo {self.id} | license: {self.license} | url: {self.square_url}"
+        return f"photo {self.id} | license: {self.license} | url: {self.square_url}"
 
     def get_photo_urls(self):
         square = self.boxed_raw.url
@@ -46,6 +46,9 @@ class Observation:
 
         self.identification_count = 2 + self.boxed_raw.num_identification_agreements + self.boxed_raw.num_identification_disagreements
         self.photos = [Photo(photo) for photo in self.boxed_raw.photos]
+
+    def __repr__(self):
+        return f"{self.sci_name} by {self.author}"
     
     def get_author_title(self):
         user = self.boxed_raw.user
@@ -63,12 +66,22 @@ class Observation:
 
 class ObservationStack:
     def __init__(self,raw_api_result):
-        self.boxed_raw = Box(raw_api_result)
-        self.observations = [Observation(result) for result in self.boxed_raw.results]
+        self.observations = [Observation(result) for result in Box(raw_api_result).results]
+
+    def __repr__(self):
+        return f"stack: {self.observations}"
+    
+    def add_new_result(self,new_api_result):
+        self.observations.extend([Observation(result) for result in Box(new_api_result).results])
 
 # "grab_species_list" should obtain a list of api objects that conform to the 
 # parsed observation object standard set out by the above class 
 
 if __name__ == "__main__":
-    fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
-    fungus.debug()
+    #fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
+    #fungus.debug()
+    result = inat.get_observations(user_id='ilisien')
+    stack = ObservationStack(result)
+    result2 = inat.get_observations(user_id='brodiebard')
+    stack.add_new_result(result2)
+    print(stack)
