@@ -43,6 +43,7 @@ class Observation:
 
         self.place = self.boxed_raw.place_guess.lower()
         self.location = self.boxed_raw.location
+        self.date = self.boxed_raw.observed_on # (datetime object)
 
         self.identification_count = 2 + self.boxed_raw.num_identification_agreements + self.boxed_raw.num_identification_disagreements
         self.photos = [Photo(photo) for photo in self.boxed_raw.photos]
@@ -61,6 +62,7 @@ class Observation:
         print(f"common_name: {self.common_name}")
         print(f"place: {self.place}")
         print(f"location: {self.location}")
+        print(f"date: {self.date}")
         print(f"identification_count: {self.identification_count}")
         print(f"photos: {self.photos}")
 
@@ -78,10 +80,10 @@ class ObservationStack:
 # parsed observation object standard set out by the above class 
 
 if __name__ == "__main__":
-    #fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
-    #fungus.debug()
-    result = inat.get_observations(user_id='ilisien')
-    stack = ObservationStack(result)
-    result2 = inat.get_observations(user_id='brodiebard')
-    stack.add_new_result(result2)
-    print(stack)
+    fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
+    fungus.debug()
+    #result = inat.get_observations(user_id='ilisien')
+    #stack = ObservationStack(result)
+    #result2 = inat.get_observations(user_id='brodiebard')
+    #stack.add_new_result(result2)
+    #print(stack)
