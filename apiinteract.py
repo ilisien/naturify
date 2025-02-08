@@ -7,12 +7,26 @@ SPECIES_LISTS = {
     "CTS OF PA": "species_lists/commontreesofpa2011.txt",
 }
 
-class ObservationStack:
-    def __init__(self,raw_api_result):
-        self.boxed_raw = Box(raw_api_result)
-        self.observations = [INatObservation(result) for result in self.boxed_raw.results]
+class Photo:
+    def __init__(self,boxed_photo_object):
+        self.boxed_raw = boxed_photo_object
+        
+        self.id = self.boxed_raw.id
+        self.license = self.boxed_raw.license_code
+        self.attribution = self.boxed_raw.attribution
+        self.square_url, self.thumb_url, self.original_url = self.get_photo_urls()
 
-class INatObservation:
+    def __repr__(self):
+        return f"Photo {self.id} | license: {self.license} | url: {self.square_url}"
+
+    def get_photo_urls(self):
+        square = self.boxed_raw.url
+        thumb = square.replace("square","thumb")
+        original = square.replace("square","original")
+        return square, thumb, original
+
+
+class Observation:
     def __init__(self,boxed_result):
         self.boxed_raw = boxed_result
 
@@ -30,18 +44,8 @@ class INatObservation:
         self.place = self.boxed_raw.place_guess.lower()
         self.location = self.boxed_raw.location
 
-        self.identifications = self.boxed_raw.identifications
-        self.project_observations = self.boxed_raw.project_observations
-        self.photos = self.boxed_raw.photos
-        self.user = self.boxed_raw.user
-
-        self.geoprivacy = self.boxed_raw.geoprivacy
-        
-
-        self.taxon = self.boxed_raw.taxon
-
-        self.num_identification_agreements = self.boxed_raw.num_identification_agreements
-        self.num_identification_disagreements = self.boxed_raw.num_identification_disagreements
+        self.identification_count = 2 + self.boxed_raw.num_identification_agreements + self.boxed_raw.num_identification_disagreements
+        self.photos = [Photo(photo) for photo in self.boxed_raw.photos]
     
     def get_author_title(self):
         user = self.boxed_raw.user
@@ -54,12 +58,17 @@ class INatObservation:
         print(f"common_name: {self.common_name}")
         print(f"place: {self.place}")
         print(f"location: {self.location}")
+        print(f"identification_count: {self.identification_count}")
+        print(f"photos: {self.photos}")
 
-        
+class ObservationStack:
+    def __init__(self,raw_api_result):
+        self.boxed_raw = Box(raw_api_result)
+        self.observations = [Observation(result) for result in self.boxed_raw.results]
 
 # "grab_species_list" should obtain a list of api objects that conform to the 
 # parsed observation object standard set out by the above class 
 
 if __name__ == "__main__":
-    fungus = INatObservation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
+    fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
     fungus.debug()
