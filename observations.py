@@ -4,6 +4,12 @@ from box import Box
 from datetime import datetime
 import random
 
+def get_season(month,latitude):
+    # should return two things -- climate and season:
+    # tropical, mid, polar; early, mid, late
+    pass
+
+
 def find_duplicates(list):
     seen = {}
     duplicates_indices = []
