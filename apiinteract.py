@@ -4,8 +4,25 @@ from box import Box
 import datetime
 
 SPECIES_LISTS = {
-    "CTS OF PA": "species_lists/commontreesofpa2011.txt",
+    "CTOP": "species_lists/commontreesofpa2011.txt",
 }
+
+def species_list(title):
+    with open(SPECIES_LISTS[title], "r") as file:
+        lines = [line.strip().lower() for line in file]
+    return lines
+
+def find_duplicates(list):
+    seen = {}
+    duplicates_indices = []
+    
+    for i, item in enumerate(list):
+        if item in seen:
+            duplicates_indices.append(i)
+        else:
+            seen[item] = True
+    
+    return duplicates_indices
 
 class Photo:
     def __init__(self,boxed_photo_object):
@@ -45,7 +62,7 @@ class Observation:
         self.location = self.boxed_raw.location
         self.date = self.boxed_raw.observed_on # (datetime object)
 
-        self.identification_count = 2 + self.boxed_raw.num_identification_agreements + self.boxed_raw.num_identification_disagreements
+        self.id_count = 2 + self.boxed_raw.num_identification_agreements + self.boxed_raw.num_identification_disagreements
         self.photos = [Photo(photo) for photo in self.boxed_raw.photos]
 
     def __repr__(self):
@@ -63,27 +80,48 @@ class Observation:
         print(f"place: {self.place}")
         print(f"location: {self.location}")
         print(f"date: {self.date}")
-        print(f"identification_count: {self.identification_count}")
+        print(f"id_count: {self.id_count}")
         print(f"photos: {self.photos}")
+    
+    def summary(self):
+        return Box({
+            "sci_name": self.sci_name,
+            "id_count": self.id_count,
+            "year": self.date.year
+        })
 
 class ObservationStack:
     def __init__(self,raw_api_result):
         self.observations = [Observation(result) for result in Box(raw_api_result).results]
+        self.remove_duplicates()
 
     def __repr__(self):
         return f"stack: {self.observations}"
     
     def add_new_result(self,new_api_result):
         self.observations.extend([Observation(result) for result in Box(new_api_result).results])
+        self.remove_duplicates()
+    
+    def remove_duplicates(self):
+        uuid_list = [o.uuid for o in self.observations]
+        print(uuid_list)
+        duplicates = sorted(find_duplicates(uuid_list),reverse=True)
+        print(duplicates)
+        if duplicates:
+            for i in duplicates:
+                del self.observations[i]
+
+    def observation_by_species(self,desired_species):
+        pass
 
 # "grab_species_list" should obtain a list of api objects that conform to the 
 # parsed observation object standard set out by the above class 
 
 if __name__ == "__main__":
-    fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
-    fungus.debug()
-    #result = inat.get_observations(user_id='ilisien')
-    #stack = ObservationStack(result)
+    #fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
+    #fungus.debug()
+    result = inat.get_observations(user_id='ilisien')
+    stack = ObservationStack(result)
     #result2 = inat.get_observations(user_id='brodiebard')
-    #stack.add_new_result(result2)
-    #print(stack)
+    stack.add_new_result(result)
+    print(stack)
