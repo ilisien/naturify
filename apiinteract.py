@@ -1,7 +1,8 @@
 import pyinaturalist as inat
 from dataclasses import dataclass
 from box import Box
-import datetime, random
+from datetime import datetime
+import random
 
 SPECIES_LISTS = {
     "CTOP": "species_lists/commontreesofpa2011.txt",
@@ -104,11 +105,12 @@ class ObservationStack:
     def __repr__(self):
         return f"stack: {self.observations}"
     
-    def observation_score(summary):
+    def observation_score(self,summary):
         score = 0
         score += (summary.year-datetime.now().year) + 4
         score += (summary.id_count - 2) * 2
-        score -= summary.times_reviewed * 5 / ((datetime.now() - summary.last_reviewed).days)
+        if summary.last_reviewed is not None:
+            score -= summary.times_reviewed * 5 / ((datetime.now() - summary.last_reviewed).days)
         return score
     
     def add_new_result(self,new_api_result):
@@ -142,4 +144,5 @@ if __name__ == "__main__":
     print("")
     print("")
     print("")
-    print(stack.deliver_observation())
+    for _ in range(0,100):
+        print(stack.deliver_observation())
