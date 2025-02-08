@@ -1,7 +1,7 @@
 import pyinaturalist as inat
 from dataclasses import dataclass
 from box import Box
-import datetime
+import datetime, random
 
 SPECIES_LISTS = {
     "CTOP": "species_lists/commontreesofpa2011.txt",
@@ -87,8 +87,14 @@ class Observation:
         return Box({
             "sci_name": self.sci_name,
             "id_count": self.id_count,
-            "year": self.date.year
+            "year": self.date.year,
+            "times_reviewed": self.times_reviewed,
+            "last_reviewed": self.last_reviewed,
         })
+    
+    def update_reviews(self):
+        self.times_reviewed += 1
+        self.last_reviewed = datetime.now()
 
 class ObservationStack:
     def __init__(self,raw_api_result):
@@ -98,21 +104,29 @@ class ObservationStack:
     def __repr__(self):
         return f"stack: {self.observations}"
     
+    def observation_score(summary):
+        score = 0
+        score += (summary.year-datetime.now().year) + 4
+        score += (summary.id_count - 2) * 2
+        score -= summary.times_reviewed * 5 / ((datetime.now() - summary.last_reviewed).days)
+        return score
+    
     def add_new_result(self,new_api_result):
         self.observations.extend([Observation(result) for result in Box(new_api_result).results])
         self.remove_duplicates()
     
     def remove_duplicates(self):
         uuid_list = [o.uuid for o in self.observations]
-        print(uuid_list)
         duplicates = sorted(find_duplicates(uuid_list),reverse=True)
-        print(duplicates)
         if duplicates:
             for i in duplicates:
                 del self.observations[i]
 
-    def observation_by_species(self,desired_species):
-        pass
+    def deliver_observation(self,desired_species=None):
+        if desired_species is None:
+            # just pick a totally random observation
+            scores = [self.observation_score(o.summary()) for o in self.observations]
+            return random.choices(self.observations,weights=scores,k=1)[0]
 
 # "grab_species_list" should obtain a list of api objects that conform to the 
 # parsed observation object standard set out by the above class 
@@ -122,6 +136,10 @@ if __name__ == "__main__":
     #fungus.debug()
     result = inat.get_observations(user_id='ilisien')
     stack = ObservationStack(result)
-    #result2 = inat.get_observations(user_id='brodiebard')
-    stack.add_new_result(result)
+    result2 = inat.get_observations(user_id='brodiebard')
+    stack.add_new_result(result2)
     print(stack)
+    print("")
+    print("")
+    print("")
+    print(stack.deliver_observation())
