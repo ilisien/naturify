@@ -3,12 +3,7 @@ from dataclasses import dataclass
 from box import Box
 from datetime import datetime
 import random
-
-def get_season(month,latitude):
-    # should return two things -- climate and season:
-    # tropical, mid, polar; early, mid, late
-    pass
-
+from climate import get_deciduous_designation
 
 def find_duplicates(list):
     seen = {}
@@ -59,6 +54,7 @@ class Observation:
         self.place = self.boxed_raw.place_guess.lower()
         self.location = self.boxed_raw.location
         self.date = self.boxed_raw.observed_on # (datetime object)
+        self.season_estimate = get_deciduous_designation(self.location[0],self.location[1],self.date.month) 
 
         self.id_count = 2 + self.boxed_raw.num_identification_agreements + self.boxed_raw.num_identification_disagreements
         self.photos = [Photo(photo) for photo in self.boxed_raw.photos]
@@ -78,6 +74,7 @@ class Observation:
         print(f"place: {self.place}")
         print(f"location: {self.location}")
         print(f"date: {self.date}")
+        print(f"season_estimate: {self.season_estimate}")
         print(f"id_count: {self.id_count}")
         print(f"photos: {self.photos}")
     
@@ -126,6 +123,9 @@ class ObservationStack:
             # just pick a totally random observation
             scores = [self.observation_score(o.summary()) for o in self.observations]
             return random.choices(self.observations,weights=scores,k=1)[0]
+    
+    def all_observations(self):
+        return self.observations
 
 # "grab_species_list" should obtain a list of api objects that conform to the 
 # parsed observation object standard set out by the above class 
@@ -133,13 +133,19 @@ class ObservationStack:
 if __name__ == "__main__":
     #fungus = Observation(Box(inat.get_observations(user_id='ilisien',taxon_name="fulvifomes robiniae")).results[0])
     #fungus.debug()
-    result = inat.get_observations(user_id='ilisien')
+    
+    #result = inat.get_observations(user_id='ilisien')
+    #stack = ObservationStack(result)
+    #result2 = inat.get_observations(user_id='brodiebard')
+    #stack.add_new_result(result2)
+    #print(stack)
+    #print("")
+    #print("")
+    #print("")
+    #for _ in range(0,100):
+    #    print(stack.deliver_observation())
+
+    result = inat.get_observations(user_id='ilisien',quality_grade="research")
     stack = ObservationStack(result)
-    result2 = inat.get_observations(user_id='brodiebard')
-    stack.add_new_result(result2)
-    print(stack)
-    print("")
-    print("")
-    print("")
-    for _ in range(0,100):
-        print(stack.deliver_observation())
+    for observation in stack.all_observations():
+        print(f"{observation.season_estimate} : {observation.date.month}")
