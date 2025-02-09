@@ -2,11 +2,14 @@ from simple_spaced_repetition import Card
 from datetime import timedelta as td
 from icecream import ic
 
+from observations import ObservationStack
+
 class OrganismCard(Card):
-    def __init__(self,taxon,deciduous_state, **kwargs):
+    def __init__(self,taxon,deciduous_state,observation_stack=None, **kwargs):
         super().__init__(kwargs)
         self.taxon = taxon
         self.deciduous_state = deciduous_state
+        self.observation_stack = observation_stack if observation_stack else ObservationStack()
 
     def __repr__(self):
         return f"OrganismCard for {self.taxon}"
@@ -19,6 +22,7 @@ class OrganismCard(Card):
             "step": self.step,
             "interval": self.interval.total_seconds() if self.interval else None,
             "ease": self.ease,
+            "observation_stack": self.observation_stack.to_dict(),
         }
 
     @classmethod
@@ -30,6 +34,7 @@ class OrganismCard(Card):
             step = orgcard_dict["step"],
             interval = td(seconds=orgcard_dict["interval"]) if orgcard_dict["interval"] else None,
             ease = orgcard_dict["ease"],
+            observation_stack = ObservationStack.from_dict(orgcard_dict["observation_stack"]),
         )
 
 if __name__ == "__main__":
