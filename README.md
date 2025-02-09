@@ -29,3 +29,10 @@ knowing a species is what we're testing, through different images held in the ob
 so there can be a base "observation stack" which contains observations that will be referenced by cards, and then there should be a "card stack" of different cards (species, time of year, etc.) which reference observations and pull from the observation stack.
 
 perhaps observation stacks should be held by cards? so a list of potential observations to be used is gotten?
+
+to control the deciduous state, there should be emoji buttons:
+flowery: 🌺 🌻 🌼 🪻
+growth: 🌱 🌿
+mature: 🌳
+autumn: 🍂 🍁
+bare: 🪵
