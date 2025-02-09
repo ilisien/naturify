@@ -20,3 +20,12 @@ we want to do the following:
     - custom list
     - by some common trees of pa book or whatever
   - needs to also show the place, studied and non-studied flashcards like quizlet style, and the expanded taxa (or at least the family) of them also needs the common name of everything to be all nice to brodie and stuff
+
+
+because cards and observations are sort of different, they need to be essentially separate
+
+knowing a species is what we're testing, through different images held in the observations
+
+so there can be a base "observation stack" which contains observations that will be referenced by cards, and then there should be a "card stack" of different cards (species, time of year, etc.) which reference observations and pull from the observation stack.
+
+perhaps observation stacks should be held by cards? so a list of potential observations to be used is gotten?
