@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from rasterio.plot import show
 import pandas as pd
 
-from download_climate_data import download_climate_data
+from utilities import download_climate_data
 
 climate_data_tif_path = "climate_data/koppen_geiger_0p1.tif"
 koppen_table = "climate_data/koppen_table.csv"
