@@ -44,8 +44,10 @@ DECIDUOUS_DESIGNATIONS = {
     3: {
         1: "bare",
         2: "flowery",
+        3: "flowery",
+        4: "growth",
         5: "growth",
-        6: "growth",
+        6: "mature",
         7: "mature",
         8: "mature",
         9: "mature",

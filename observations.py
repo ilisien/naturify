@@ -62,10 +62,10 @@ class Observation:
         self.sci_name = self.boxed_raw.taxon.name.lower()
         self.common_name = self.boxed_raw.taxon.preferred_common_name.lower()
 
-        self.place = self.boxed_raw.place_guess.lower()
+        self.place = self.boxed_raw.place_guess.lower() if self.boxed_raw.place_guess is not None else None
         self.location = self.boxed_raw.location
-        self.date = self.boxed_raw.observed_on # (datetime object)
-        self.season_estimate = get_deciduous_designation(self.location[0],self.location[1],self.date.month) 
+        self.date = self.boxed_raw.observed_on if isinstance(self.boxed_raw.observed_on,datetime) else datetime.fromisoformat(self.boxed_raw.observed_on)# (datetime object)
+        self.season_estimate = get_deciduous_designation(self.location[0],self.location[1],self.date.month) if self.location is not None else None
 
         self.id_count = 2 + self.boxed_raw.num_identification_agreements + self.boxed_raw.num_identification_disagreements
         self.photos = [Photo(photo) for photo in self.boxed_raw.photos]
@@ -106,13 +106,13 @@ class Observation:
         return {
             "raw": self.boxed_raw.to_dict(),
             "times_reviewed": self.times_reviewed,
-            "last_reviewed": self.last_reviewed.isoformat() if self.last_reviewed is None else None
+            "last_reviewed": self.last_reviewed.isoformat() if self.last_reviewed is not None else None
         }
     
     @classmethod
     def from_dict(cls,dict):
         return cls(
-            boxed_result=dict["raw"],
+            boxed_result=Box(dict["raw"]),
             times_reviewed=dict["times_reviewed"],
             last_reviewed=datetime.fromisoformat(dict["last_reviewed"]) if dict["last_reviewed"] is not None else None
         )
@@ -132,6 +132,8 @@ class ObservationStack:
         return f"stack: {self.observations}"
     
     def add_new_result(self,new_api_result):
+        if self.observations is None:
+            self.observations = []
         self.observations.extend([Observation(result) for result in Box(new_api_result).results])
         self.remove_duplicates()
     

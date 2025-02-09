@@ -1,6 +1,7 @@
 from simple_spaced_repetition import Card
 from datetime import timedelta as td
 from icecream import ic
+import pyinaturalist as inat
 
 from observations import ObservationStack
 
@@ -38,12 +39,14 @@ class OrganismCard(Card):
         )
 
 if __name__ == "__main__":
+    result = inat.get_observations(taxon_name="staphylea trifolia")
     bladdernut_card = OrganismCard("staphylea trifolia","bare")
-    ic(bladdernut_card)
+
+    bladdernut_card.observation_stack.add_new_result(result)
+
+    print(bladdernut_card)
     bladdernut_dict = bladdernut_card.to_dict()
-    ic(bladdernut_dict)
     coffeetree_dict = bladdernut_dict
     coffeetree_dict["taxon"] = "gymnocladus dioicus"
-    ic(coffeetree_dict)
     coffeetree_card = OrganismCard.from_dict(coffeetree_dict)
-    ic(coffeetree_card)
+    print(coffeetree_card)
